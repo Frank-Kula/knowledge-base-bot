@@ -5,15 +5,23 @@
 
 import asyncio
 import sys
+import logging
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import time
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(message)s'
+)
+logger = logging.getLogger(__name__)
 
 try:
     import httpx
     from bs4 import BeautifulSoup
 except ImportError:
-    print("请先安装依赖：pip install httpx beautifulsoup4")
+    logger.error("请先安装依赖：pip install httpx beautifulsoup4")
     sys.exit(1)
 
 
@@ -29,7 +37,7 @@ class SimpleCrawler:
 
     async def crawl(self, max_pages: int = 50):
         """爬取文档"""
-        print(f"开始爬取 Apifox 文档，最大页面数: {max_pages}")
+        logger.info(f"开始爬取 Apifox 文档，最大页面数: {max_pages}")
 
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             count = 0
@@ -40,7 +48,7 @@ class SimpleCrawler:
                 if url in self.visited_urls:
                     continue
 
-                print(f"[{count+1}/{max_pages}] 爬取: {url}")
+                logger.info(f"[{count+1}/{max_pages}] 爬取: {url}")
 
                 try:
                     await self.crawl_page(url, client)
@@ -49,9 +57,9 @@ class SimpleCrawler:
                     time.sleep(1)  # 避免过快请求
 
                 except Exception as e:
-                    print(f"  ✗ 失败: {e}")
+                    logger.error(f"  ✗ 失败: {e}")
 
-            print(f"\n✓ 爬取完成！共爬取 {count} 个页面")
+            logger.info(f"\n✓ 爬取完成！共爬取 {count} 个页面")
 
     async def crawl_page(self, url: str, client):
         """爬取单个页面"""
@@ -149,19 +157,19 @@ class SimpleCrawler:
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print(f"  ✓ 保存: {filepath.name}")
+        logger.info(f"  ✓ 保存: {filepath.name}")
 
 
 async def main():
     """主函数"""
-    print("=" * 60)
-    print("Apifox 文档爬虫（简化版）")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("Apifox 文档爬虫（简化版）")
+    logger.info("=" * 60)
 
     crawler = SimpleCrawler()
     await crawler.crawl(max_pages=50)
 
-    print("\n✓ 所有文档已保存到 data/documents/apifox/")
+    logger.info("\n✓ 所有文档已保存到 data/documents/apifox/")
 
 
 if __name__ == "__main__":

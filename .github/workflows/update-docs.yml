@@ -35,9 +35,9 @@ jobs:
           pip install chromadb sentence-transformers
           pip install anthropic
 
-      - name: 检查文档更新
+      - name: 爬取 Apifox 文档
         run: |
-          python src/rag/crawl_apifox_docs.py
+          python src/rag/simple_crawler.py
         env:
           PYTHONPATH: ${{ github.workspace }}
 
