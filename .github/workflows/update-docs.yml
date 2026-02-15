@@ -1,7 +1,7 @@
 name: Update Apifox Docs
 
 on:
-  # 定时执行：每天凌晨 2 点
+  # 定时执行：每天 UTC 2:00（北京时间 10:00）
   schedule:
     - cron: '0 2 * * *'
 
@@ -11,8 +11,8 @@ on:
   # 当配置文件改变时也触发
   push:
     paths:
-      - 'src/rag/**'
       - '.github/workflows/update-docs.yml'
+      - 'src/rag/**'
 
 jobs:
   update-docs:
@@ -26,30 +26,26 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          cache: 'pip'
 
       - name: 安装依赖
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install requests beautifulsoup4 markdownify httpx
+          pip install chromadb sentence-transformers
+          pip install anthropic
 
       - name: 检查文档更新
         run: |
-          python src/rag/auto_update_docs.py --mode check
-
-      - name: 如果有更新，全量更新
-        run: |
-          python src/rag/auto_update_docs.py --mode smart
-
-      - name: 重建知识库
-        run: |
-          python src/rag/knowledge_base.py
+          python src/rag/crawl_apifox_docs.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
       - name: 提交更改
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/documents/
-          git add data/vectordb/
           git diff --staged --quiet || git commit -m "docs: 自动更新 Apifox 文档 [skip ci]"
 
       - name: 推送更改

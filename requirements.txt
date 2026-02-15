@@ -1,44 +1,24 @@
-# 核心依赖
-langchain==0.1.0
-langchain-community==0.0.10
-langchain-anthropic==0.1.0
-
-# LLM 提供商
-anthropic==0.18.0
-openai==1.6.0
+# 文档爬取和知识库构建（最小依赖）
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+markdownify>=0.11.0
+httpx>=0.26.0
 
 # 向量数据库
-chromadb==0.4.18
-# pinecone-client==2.2.4  # 可选
-# weaviate-client==3.24.2  # 可选
+chromadb>=0.4.18
+sentence-transformers>=2.2.0
 
-# Web 框架
-fastapi==0.109.0
-uvicorn==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+# LLM 和 RAG
+langchain>=0.1.0
+langchain-community>=0.0.10
+anthropic>=0.18.0
 
-# 飞书 SDK
-lark-oapi==1.2.19
+# Web 框架（可选）
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
 
-# HTTP 客户端
-httpx==0.26.0
-requests==2.31.0
-
-# 数据处理
-numpy==1.26.3
-pandas==2.1.4
-
-# 工具库
-python-dotenv==1.0.0
-pyyaml==6.0.1
-loguru==0.7.2
-
-# 文档处理
-beautifulsoup4==4.12.2
-markdownify==0.11.6
-selenium==4.16.0  # 用于爬取文档
-
-# 数据库
-sqlalchemy==2.0.25
-sqlite3  # Python 标准库
+# 工具
+python-dotenv>=1.0.0
+pyyaml>=6.0
+loguru>=0.7.0
