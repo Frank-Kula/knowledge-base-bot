@@ -1,0 +1,277 @@
+# 技术支持知识库机器人配置文件
+
+# 机器人配置
+bots:
+  # 企业微信
+  wecom:
+    enabled: true
+    webhook_url: "${WECOM_WEBHOOK_URL}"
+    # 支持的群聊列表
+    chat_ids:
+      - "技术支持群1"
+      - "技术支持群2"
+
+  # 飞书
+  feishu:
+    enabled: true
+    app_id: "${FEISHU_APP_ID}"
+    app_secret: "${FEISHU_APP_SECRET}"
+    encrypt_key: "${FEISHU_ENCRYPT_KEY}"
+    verification_token: "${FEISHU_VERIFICATION_TOKEN}"
+    # 支持的群列表
+    chat_ids:
+      - "oc_xxxxxxxxxxxxxxxx"
+
+# LLM 配置
+llm:
+  provider: "anthropic"  # anthropic/openai/deepseek
+  api_key: "${LLM_API_KEY}"
+  model: "claude-3-5-sonnet-20241022"
+  temperature: 0.3
+  max_tokens: 2000
+  timeout: 30
+
+# RAG 知识库配置
+rag:
+  # 文档来源
+  document_sources:
+    - url: "https://docs.apifox.com/"
+      name: "apifox_docs"
+      enabled: true
+
+  # 向量数据库
+  vector_db:
+    provider: "chroma"  # chroma/pinecone/weaviate
+    path: "./data/vectordb"
+    collection_name: "apifox_knowledge"
+
+  # 检索配置
+  retrieval:
+    chunk_size: 500
+    chunk_overlap: 50
+    top_k: 5  # 返回最相关的5个文档片段
+    score_threshold: 0.7
+
+# 分类器配置
+classifier:
+  # 问题类型
+  question_types:
+    - "bug"        # 缺陷/Bug
+    - "feature"    # 需求/功能建议
+    - "usage"      # 使用问题/最佳实践
+
+  # 分类阈值
+  confidence_threshold: 0.6
+
+  # 分类 Prompt
+  prompt_template: |
+    你是技术支持专家，需要根据用户反馈判断问题类型。
+
+    ## 用户问题
+    {question}
+
+    ## 帮助文档相关内容
+    {context}
+
+    ## 补充信息
+    {additional_info}
+
+    ## 判断标准
+    1. **缺陷 (Bug)**：产品功能与预期设计不符，或出现了错误/报错
+       - 例如：功能异常、崩溃、报错、性能问题、兼容性问题
+
+    2. **需求 (Feature)**：产品缺少某个功能，或现有功能无法满足用户的工作流
+       - 例如：新功能建议、功能改进、工作流优化
+
+    3. **使用问题 (Usage)**：用户未找到正确的操作方式或最佳实践
+       - 例如：不知道如何配置、找不到某个功能
+
+    请严格按照以上标准判断，并返回 JSON 格式：
+    {{
+      "type": "bug|feature|usage",
+      "confidence": 0.0-1.0,
+      "reason": "判断理由（引用具体的判断标准）",
+      "suggested_answer": "基于文档的建议回答（如果是使用问题）"
+    }}
+
+    注意：如果是偶发问题或低概率复现，在 reason 中明确标注。
+
+# 信息收集配置
+info_collection:
+  # 缺陷信息收集字段
+  bug_fields:
+    - name: "title"
+      question: "请用一句话描述问题（20字以内，包含功能模块和现象）"
+      required: true
+      example: "【Apifox Web】使用 Agent 发起请求会有 300ms 的延迟响应"
+
+    - name: "version"
+      question: "请问您的 Apifox 版本号是多少？"
+      required: true
+
+    - name: "environment"
+      question: "问题出现在哪个端？[Web端/客户端/浏览器及版本]"
+      required: true
+
+    - name: "steps"
+      question: "请详细描述复现步骤（按1-2-3-4编号，必须清晰且完整）"
+      required: true
+      example: "1. 登录 Apifox 账号，进入项目\n2. 点击导入按钮\n3. 选择 Swagger 2.0 格式并上传\n4. 在接口列表查看"
+
+    - name: "expected"
+      question: "预期应该发生什么？"
+      required: true
+
+    - name: "actual"
+      question: "实际出现了什么问题或现象？"
+      required: true
+
+    - name: "reproducibility"
+      question: "这个问题是必现还是偶现？如果是偶现，大概概率是多少？"
+      required: true
+
+    - name: "additional_info"
+      question: "能否提供以下信息：\n1. 截图或录屏（视频格式，不用gif）\n2. Console 报错截图\n3. Network 日志（HAR文件）\n4. 项目ID/邮箱/团队ID等具体信息"
+      required: false
+
+  # 需求信息收集字段
+  feature_fields:
+    - name: "title"
+      question: "请简要描述需求建议（20字以内）"
+      required: true
+
+    - name: "user_scenario"
+      question: "用户在什么情况下、想做什么事情？请描述具体使用场景"
+      required: true
+      hint: "例如：用户在处理完 A 流程后，希望能一键跳转到 B 流程，以节省时间"
+
+    - name: "current_status"
+      question: "用户目前遇到了什么障碍？为什么现有功能无法满足？"
+      required: true
+
+    - name: "user_expectation"
+      question: "用户希望达成的最终目标是什么？期望的解决方案是什么？"
+      required: true
+
+    - name: "user_type"
+      question: "用户类型？[个人/企业/私有化用户]"
+      required: true
+
+    - name: "subscription_status"
+      question: "付费/订阅状态？[免费版/付费版/私有化]"
+      required: true
+
+    - name: "team_size"
+      question: "团队规模大概多少人？"
+      required: false
+
+    - name: "impact_level"
+      question: "这个需求对用户工作流的影响程度？(例如：每天节省 5 分钟，团队 50% 接口都有这个问题)"
+      required: false
+
+  # 最大提问轮数
+  max_rounds: 8
+
+# 飞书工单配置
+feishu_ticket:
+  base_url: "https://open.feishu.cn"
+  spreadsheet_token: "${FEISHU_SPREADSHEET_TOKEN}"
+  app_token: "${FEISHU_APP_TOKEN}"
+  table_id: "${FEISHU_TABLE_ID}"
+
+  # 字段映射
+  field_mappings:
+    title: "标题"
+    type: "类型"
+    priority: "优先级"
+    version: "版本"
+    environment: "环境"
+    description: "问题描述"
+    steps: "复现步骤"
+    expected: "预期结果"
+    actual: "实际结果"
+    attachments: "附件"
+    submitter: "提交人"
+    created_at: "创建时间"
+
+  # 通知配置
+  notification:
+    enabled: true
+    # @的负责人
+    mention_users:
+      - "ou_xxxxxxxxxxxxxxxx"  # 你的飞书用户ID
+    # 通知消息模板
+    message_template: |
+      新的{type}提交：{title}
+      提交人：{submitter}
+      优先级：{priority}
+      详情请查看多维表格
+
+# 模板配置
+templates:
+  bug_template: |
+    ## Bug 报告
+
+    **标题**：{title}
+
+    **版本**：{version}
+    **环境**：{environment}
+
+    **问题描述**：
+    {description}
+
+    **复现步骤**：
+    {steps}
+
+    **预期结果**：
+    {expected}
+
+    **实际结果**：
+    {actual}
+
+    **附加信息**：
+    {additional_info}
+
+  feature_template: |
+    ## 功能需求
+
+    **标题**：{title}
+
+    **需求背景**：
+    {background}
+
+    **预期场景**：
+    {scenario}
+
+    **期望行为**：
+    {expected}
+
+    **价值说明**：
+    {value}
+
+    **附加信息**：
+    {additional_info}
+
+  usage_template: |
+    ## 使用咨询
+
+    **问题**：{question}
+
+    **解答**：
+    {answer}
+
+    **相关文档**：
+    {related_docs}
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG/INFO/WARNING/ERROR
+  file: "./logs/bot.log"
+  rotation: "10 MB"
+  retention: "30 days"
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
