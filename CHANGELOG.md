@@ -185,6 +185,57 @@ ModuleNotFoundError: No module named 'loguru'
 
 ---
 
+## [2025-01-15] GitHub Actions #3 运行失败
+
+**运行**：#3
+
+**问题**：
+- ❌ GitHub Actions 机器人推送权限不足
+
+**错误日志**：
+```
+remote: Permission to Frank-Kula/knowledge-base-bot.git denied to github-actions[bot].
+fatal: unable to access 'https://github.com/Frank-Kula/knowledge-base-bot.git/': The error: 403
+Error: Invalid exit code: 128
+```
+
+**原因**：
+- 使用了第三方 action `ad-m/github-push-action@master`
+- 没有设置 `permissions: contents: write`
+
+---
+
+## [2025-01-15] 修复 GitHub Actions 推送权限
+
+### 提交 b9f4f71
+**消息**：fix: 修复 GitHub Actions 推送权限问题
+
+**修改内容**：
+1. ✅ 添加 `permissions: contents: write`
+2. ✅ 使用官方 `git push` 命令替代第三方 action
+3. ✅ 配置 checkout 使用 `GITHUB_TOKEN`
+
+**修改的文件**：
+- `.github/workflows/update-docs.yml`
+
+**具体改动**：
+```yaml
+# 添加权限
+permissions:
+  contents: write
+
+# 使用官方 git push
+- name: 推送更改
+  run: |
+    git push origin main
+```
+
+**推送状态**：✅ 成功推送到 `main` 分支
+
+**预计**：GitHub Actions #4 会成功运行
+
+---
+
 ## [2025-01-15] 创建变更日志
 
 ### 本文件
