@@ -1,0 +1,27 @@
+# 参数列表外观
+
+Apifox 支持两种不同的参数列表展示方式：
+
+- **现代风格**：将每个参数的属性紧凑地分组展示。
+
+    <Background>
+    ![image.png](https://api.apifox.com/api/v1/projects/5097254/resources/477523/image-preview)
+    </Background>
+
+- **经典风格**：以表格形式显示每个参数的属性。
+
+    <Background>
+    ![image.png](https://api.apifox.com/api/v1/projects/5097254/resources/477522/image-preview)
+    </Background>
+
+你可以在 Apifox 中通过导航至 `项目设置` > `通用设置` > `功能设置` > `接口功能设置` 来配置展示方式。
+
+<Background>
+![image.png](https://api.apifox.com/api/v1/projects/5097254/resources/477524/image-preview)
+</Background>
+
+设置完成后，这个偏好将体现在 Apifox 应用的 “接口管理” 模块以及外部共享的文档中。
+
+:::tip[]
+如果屏幕宽度不足，系统会自动切换到“现代”风格。
+:::

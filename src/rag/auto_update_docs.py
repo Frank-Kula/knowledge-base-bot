@@ -13,6 +13,7 @@ from loguru import logger
 from crawl_apifox_docs import ApifoxDocsCrawler
 from knowledge_base import KnowledgeBase
 from utils.config_loader import load_config
+from utils.notifier import FeishuNotifier
 
 
 class AutoDocsUpdater:
@@ -157,6 +158,25 @@ class AutoDocsUpdater:
             self._save_metadata()
 
             logger.info(f"检查完成: {stats}")
+            # 发送 webhook 通知
+            if stats["updated"] > 0 or stats["new"] > 0 or stats["deleted"] > 0:
+                config = load_config()
+                feishu_cfg = config.bots.get("feishu", {})
+                webhook_url = feishu_cfg.get("webhook_url") if isinstance(feishu_cfg, dict) else getattr(feishu_cfg, "webhook_url", None)
+                if webhook_url:
+                    notifier = FeishuNotifier(webhook_url=webhook_url)
+                    import asyncio
+                    asyncio.create_task(notifier.send_card(
+                        title="📚 Apifox 文档同步更新提示",
+                        content={
+                            "总处理量": str(stats["total"]),
+                            "新增文档": str(stats["new"]),
+                            "更新文档": str(stats["updated"]),
+                            "删除文档": str(stats["deleted"])
+                        },
+                        status="blue"
+                    ))
+
             return stats
 
         finally:
@@ -189,6 +209,21 @@ class AutoDocsUpdater:
         self._save_metadata()
 
         logger.info("全量更新完成")
+        config = load_config()
+        feishu_cfg = config.bots.get("feishu", {})
+        webhook_url = feishu_cfg.get("webhook_url") if isinstance(feishu_cfg, dict) else getattr(feishu_cfg, "webhook_url", None)
+        if webhook_url:
+            notifier = FeishuNotifier(webhook_url=webhook_url)
+            import asyncio
+            asyncio.create_task(notifier.send_card(
+                title="📚 Apifox 文档全量同步完成",
+                content={
+                    "操作描述": "完成了站点文档的全量防丢备份和拉取",
+                    "状态": "已完成全量拉取",
+                    "下一步": "等待重建知识库向量"
+                },
+                status="blue"
+            ))
 
     async def smart_update(self, force: bool = False):
         """
@@ -236,6 +271,20 @@ async def rebuild_knowledge_base():
     await kb.close()
 
     logger.info("知识库重建完成")
+    config = load_config()
+    feishu_cfg = config.bots.get("feishu", {})
+    webhook_url = feishu_cfg.get("webhook_url") if isinstance(feishu_cfg, dict) else getattr(feishu_cfg, "webhook_url", None)
+    if webhook_url:
+        notifier = FeishuNotifier(webhook_url=webhook_url)
+        await notifier.send_card(
+            title="🧠 知识库向量库更新完毕",
+            content={
+                "操作": "知识库重建并初始化",
+                "状态": "Success",
+                "影响": "新的文档内容现在可以被机器人检索和回答"
+            },
+            status="green"
+        )
 
 
 async def main():

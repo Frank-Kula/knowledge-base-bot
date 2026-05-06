@@ -68,3 +68,16 @@ htmlcov/
 # 备份文件
 *_backup/
 *~
+
+# Dependencies
+node_modules/
+
+# Test/temp files
+.test_*.json
+.test_*.sh
+scratch/
+tmp/
+
+# Local data
+data/local_tickets/
+data/.wecom_processed.json

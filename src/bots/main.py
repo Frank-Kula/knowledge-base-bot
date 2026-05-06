@@ -12,10 +12,13 @@ from loguru import logger
 import sys
 from pathlib import Path
 
-# 添加项目根目录到路径
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# 添加项目根目录和 src 目录到路径
+root_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(root_dir))
+sys.path.insert(0, str(root_dir / "src"))
 
 from bots.wecom_bot import WeComBot
+from bots.apifox_wecom_bot import ApifoxWeComBot
 from bots.feishu_bot import FeishuBot
 from rag.knowledge_base import KnowledgeBase
 from classifiers.question_classifier import QuestionClassifier
@@ -35,6 +38,7 @@ template_mgr = TemplateManager(config)
 
 # 初始化机器人
 wecom_bot = WeComBot(config, kb, classifier, template_mgr)
+apifox_wecom_bot = ApifoxWeComBot(config, kb, classifier, template_mgr)
 feishu_bot = FeishuBot(config, kb, classifier, template_mgr)
 
 
@@ -64,15 +68,41 @@ async def wecom_webhook(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/webhook/apifox_wecom")
+async def apifox_wecom_webhook(request: Request):
+    """Apifox 定制版企微机器人 Webhook"""
+    try:
+        data = await request.json()
+
+        # 检查是否为指定格式事件
+        if data.get("type") != "chat.message":
+            return JSONResponse(content={"errmsg": "ignored event type"})
+
+        # 异步处理消息
+        asyncio.create_task(apifox_wecom_bot.handle_message(data))
+
+        return JSONResponse(content={"errmsg": "ok"})
+
+    except Exception as e:
+        logger.error(f"Apifox 定制版企微 Webhook 处理错误: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/webhook/feishu")
 async def feishu_webhook(request: Request):
     """飞书机器人 Webhook"""
     try:
         data = await request.json()
+        logger.info(f"收到飞书请求: {data}")
 
-        # 飞书挑战验证
-        if "challenge" in data:
-            return JSONResponse(content={"challenge": data["challenge"]})
+        # 飞书挑战验证 (URL 验证)
+        if data.get("type") == "url_verification":
+            challenge = data.get("challenge", "")
+            logger.info(f"飞书挑战验证: {challenge}")
+            return JSONResponse(
+                content={"challenge": challenge},
+                media_type="application/json"
+            )
 
         # 飞书消息处理
         if data.get("type") == "event":
@@ -92,8 +122,11 @@ async def startup_event():
     """启动事件"""
     logger.info("技术支持知识库机器人启动中...")
 
-    # 初始化知识库
-    await kb.initialize()
+    # 初始化知识库（失败不阻塞启动）
+    try:
+        await kb.initialize()
+    except Exception as e:
+        logger.warning(f"知识库初始化失败，将使用空知识库: {e}")
 
     logger.info("机器人启动完成，监听端口: {}", config.server.port)
 

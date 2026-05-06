@@ -17,7 +17,7 @@ class WeComBot:
         self.kb = kb
         self.classifier = classifier
         self.template_mgr = template_mgr
-        self.webhook_url = config.bots.wecom.webhook_url
+        self.webhook_url = config.bots["wecom"].webhook_url
         # 对话管理器
         from bots.conversation_manager import ConversationManager
         self.conversation_mgr = ConversationManager(config)

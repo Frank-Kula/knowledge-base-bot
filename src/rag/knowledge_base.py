@@ -3,11 +3,15 @@
 基于帮助文档构建向量数据库
 """
 
+import os
+# 设置 HuggingFace 镜像
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+
 from typing import List, Dict
 from pathlib import Path
 from loguru import logger
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import (
@@ -15,7 +19,7 @@ from langchain_community.document_loaders import (
     TextLoader,
     BSHTMLLoader
 )
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 
 class KnowledgeBase:
@@ -36,9 +40,18 @@ class KnowledgeBase:
         try:
             logger.info("初始化知识库...")
 
-            # 初始化嵌入模型
+            # 初始化嵌入模型 (使用本地下载的模型)
+            import os
+            os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+            local_model_path = Path(__file__).parent.parent.parent / "models" / "text2vec-base-chinese"
+            if local_model_path.exists():
+                model_name = str(local_model_path)
+                logger.info(f"使用本地模型: {model_name}")
+            else:
+                model_name = "shibing624/text2vec-base-chinese"
+                logger.info(f"使用远程模型: {model_name}")
             self.embeddings = HuggingFaceEmbeddings(
-                model_name="shibing624/text2vec-base-chinese",
+                model_name=model_name,
                 model_kwargs={'device': 'cpu'},
                 encode_kwargs={'normalize_embeddings': True}
             )
@@ -196,7 +209,12 @@ def build_knowledge_base():
     从帮助文档构建向量数据库
     """
     import argparse
+    import sys
+    from pathlib import Path
     from langchain_community.document_loaders import DirectoryLoader
+
+    # 添加 src 目录到路径
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
     parser = argparse.ArgumentParser(description="构建知识库")
     parser.add_argument(
@@ -220,7 +238,7 @@ def build_knowledge_base():
         str(docs_dir),
         glob="**/*.md",
         loader_cls=TextLoader,
-        loader_kwargs={"autodetect_encoding": True}
+        loader_kwargs={"encoding": "utf-8"}
     )
     documents = loader.load()
 
@@ -231,9 +249,16 @@ def build_knowledge_base():
     config = load_config()
     kb = KnowledgeBase(config)
 
-    # 初始化嵌入模型
+    # 初始化嵌入模型 (使用本地下载的模型)
+    import os
+    os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+    local_model_path = Path(__file__).parent.parent.parent / "models" / "text2vec-base-chinese"
+    if local_model_path.exists():
+        model_name = str(local_model_path)
+    else:
+        model_name = "shibing624/text2vec-base-chinese"
     kb.embeddings = HuggingFaceEmbeddings(
-        model_name="shibing624/text2vec-base-chinese",
+        model_name=model_name,
         model_kwargs={'device': 'cpu'},
         encode_kwargs={'normalize_embeddings': True}
     )

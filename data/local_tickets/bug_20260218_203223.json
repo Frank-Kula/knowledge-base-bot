@@ -1,0 +1,18 @@
+{
+  "type": "bug",
+  "created_at": "2026-02-18T20:32:23.008954",
+  "data": {
+    "_chat_id": "test_chat_001",
+    "title": "接口测试返回500错误",
+    "version": "2.5.0",
+    "environment": "Web端",
+    "steps": "1. 打开Apifox\n2. 创建接口测试\n3. 发送请求",
+    "expected": "返回200",
+    "actual": "返回500错误",
+    "reproducibility": "必现",
+    "additional_info": "测试数据",
+    "confidence": 95,
+    "reason": "测试分类",
+    "submitter": "test_user_001"
+  }
+}

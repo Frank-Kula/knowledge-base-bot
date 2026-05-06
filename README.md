@@ -24,7 +24,7 @@
    - 最佳实践/使用问题判断
 
 3. **知识库检索**
-   - 基于 Apifox 帮助文档
+   - 基于 Apifox 帮助文档 (https://docs.apifox.com/)
    - RAG 向量检索
    - 历史问题匹配
 
@@ -46,6 +46,8 @@ knowledge-base-bot/
 │   └── history/         # 历史记录
 ├── src/                 # 源代码
 │   ├── bots/           # 企微/飞书机器人
+│   ├── handlers/       # 回调处理器（卡片按钮交互）
+│   ├── integrations/   # 第三方集成（lark-cli）
 │   ├── rag/            # 知识库检索
 │   ├── classifiers/    # 问题分类器
 │   └── utils/          # 工具函数
@@ -150,8 +152,59 @@ python src/bots/main.py
 - [ ] Phase 2: 企微/飞书机器人集成
 - [ ] Phase 3: RAG 知识库构建
 - [ ] Phase 4: 问题分类器开发
-- [ ] Phase 5: 飞书工单系统集成
+- [x] Phase 5: 飞书工单系统集成
 - [ ] Phase 6: 测试与优化
+
+## 更新日志
+
+### 2026-04-24 沉浸式交互与智能提取优化
+
+**新增功能**
+- **智能信息收集卡片**：推出「填空题」样式卡片（`build_smart_collection_card`），实时显示收集进度并引导用户点击按钮补充。
+- **LLM 异步实体提取**：利用 LLM 自动从多轮对话中识别版本、系统、步骤等信息，自动填补进度卡片，极大降低用户录入成本。
+- **飞书长连接 (WebSocket) 支持**：提供 `src/bots/feishu_ws_main.py`，无需公网 IP 即可接收回调，解决内网开发及部署难题。
+- **工单交互闭环**：卡片支持「立即提交」、「强制提交」、「继续修改」等动作，并与多维表格深度同步。
+
+**代码变更**
+- `src/bots/feishu_bot.py`：重构消息处理逻辑，集成会话管理器和智能分类/提取。
+- `src/utils/message_card_builder.py`：新增多种交互式卡片模板，支持 AppLink 和 callback。
+- `src/bots/feishu_ws_main.py`：新增 WebSocket 入口，支持去重和 SSL 证书自动 Patch。
+
+### 2026-04-20 交互式消息卡片功能
+
+**新增功能**
+- 创建 `src/utils/message_card_builder.py` - 飞书交互卡片构建器
+- 支持 Bug 告警卡片（红色标题）、功能建议卡片（蓝色标题）
+- 多列布局、分割线、引用区块、操作按钮
+
+**卡片按钮交互逻辑**
+- 「查看完整上下文」按钮：AppLink 协议跳转到多维表格记录详情页
+- 「一键认领并跟进」按钮：callback 类型，触发后端更新负责人字段
+- 「转为 PM 需求」按钮：callback 类型，将 Bug 转为需求记录
+
+**技术要点**
+- 使用 Git Bash 解决 Windows 命令行 JSON 引号问题
+- Shell 命令替换 `$(cat file)` 传递复杂 JSON
+- AppLink 协议：`lark://applink.feishu.cn/client/bitable/open?appToken=xxx&tableId=xxx&recordId=xxx`
+
+**文件变更**
+- `src/utils/message_card_builder.py` - 新增，支持 AppLink 和 callback
+- `src/integrations/lark_cli_wrapper.py` - 修复交互卡片发送逻辑
+- `src/handlers/card_callback_handler.py` - 新增，处理按钮回调事件
+
+### 2026-04-17 飞书集成优化
+
+**代码简化**
+- 删除 httpx 降级逻辑，统一使用 lark-cli
+- `src/bots/feishu_integration.py` 从 ~300 行简化到 ~100 行
+
+**lark-cli 封装**
+- `src/integrations/lark_cli_wrapper.py` 封装飞书 CLI 操作
+- 支持发送消息、创建多维表格记录、搜索消息等
+
+**企微消息桥接**
+- 配置企微机器人参数（Token、EncodingAESKey）
+- 域名验证暂受阻（ngrok 域名不符合企业要求）
 
 ## 技术栈
 

@@ -1,0 +1,96 @@
+# 接口文档完整性检测
+
+:::tip[关于 AI 功能]
+
+1. AI 功能默认关闭，你需要手动 [启用 AI 功能](https://docs.apifox.com/enable-ai-features) 才可以开始使用（请确保 Apifox 版本`≥2.7.55`）。
+
+2. AI 功能免费提供，但不内置 AI 模型，你需要自行 [添加 AI 模型](https://docs.apifox.com/enable-ai-features#%E9%85%8D%E7%BD%AE-ai-%E4%BE%9B%E5%BA%94%E5%95%86) 并配置对应的 API Key。
+:::
+
+可以让 AI 基于当前接口文档来进行完整性检查，获得检查报告。使用此报告获得的结果，对接口文档进行完善，从而让协作更顺畅、阅读更清晰，并使得所有 AI 功能基于更准确的接口信息发挥最佳效果。
+
+## 检测内容
+在正式检测接口文档前，推荐检查当前接口文档的各项说明、定义是否完善，你可以从以下内容开始：
+
+### 1. 基础定义
+检查接口文档是否准确且清晰的声明：
+  - **请求方式**：定义接口的 HTTP Method（如 GET、POST、PUT、DELETE 等），用于判断请求的语义、幂等性及入参结构的适配性。
+  - **请求路径**：完整的 URL 路径（不含前置 URL），用于识别接口的唯一性及推断路径参数结构。
+  
+  - **接口名称和接口说明**：接口的功能简介。用于让文档阅读者、AI 模型理解接口的业务语义，从而判断参数、响应和错误码是否完整、合理。
+
+
+ 
+<Background>
+
+![CleanShot 2025-11-27 at 16.56.09@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/598377/image-preview)
+
+</Background>
+
+
+### 2. 参数描述
+检查接口文档是否准确且清晰的声明：
+  - **参数名**（如必要，可检查 Params，Body，Headers，Cookies 等）：用于确保参数结构齐全、命名一致、位置正确。
+  - **示例值**：提供合法的示例入参值，便于理解参数的典型取值、格式、数据类型与业务语义。
+  - **参数说明**：解释参数的含义、用途和业务场景。
+
+请求参数的基本信息可以通过 AI 来辅助生成或修改。
+ 
+
+<Background>
+![CleanShot 2025-12-05 at 10.52.55@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/601166/image-preview)
+</Background>
+
+### 3. 参数描述
+检查接口文档是否准确且清晰的声明：
+  - **是否必填、是否允许 NULL**：明确参数是否为必填项、是否允许空值，用于判断用例场景（如必填缺失、非法空值）的合理性。
+  - **枚举/常量**：列出参数可能的枚举值或常量及对应含义，用于验证参数取值合法性与覆盖性。
+  - **边界值**：给出最小值、最大值、长度限制等信息，用于检测文档是否正确表达参数的约束条件。
+  - **format**：说明该参数的特殊格式（如 date-time、email、uuid、binary、int64、json-string 等），用于确保模型能准确验证格式合法性。
+
+
+<Background>
+
+![CleanShot 2025-12-05 at 11.05.26@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/601174/image-preview)
+    
+    ![Apifox-01.gif](https://api.apifox.com/api/v1/projects/5097254/resources/601083/image-preview)
+    
+</Background>
+
+### 4. 响应定义
+检查接口文档是否准确且清晰地声明：
+  - **响应体**：提供响应体所属 Content-Type 的完整结构、字段含义说明、HTTP 状态码及错误码，以便模型判断接口输出是否标准、字段是否缺失、结构是否一致。
+
+响应的基本信息也可以通过 AI 来生成或修改。
+
+<Background>
+
+![CleanShot 2025-12-05 at 11.11.12@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/601179/image-preview)
+</Background>
+
+## 检测接口文档完整性
+你可以在某个接口文档页中，右上角找到接口文档完整性检测的功能入口，点击即可进入接口文档完整性检测。
+
+
+
+<Background>
+![CleanShot 2025-12-04 at 16.35.59@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/601018/image-preview)
+</Background>
+
+如果这个功能显示为置灰状态，表示当前未启用，需要团队或组织管理员在设置中打开后才可使用。同时，请确保你的 Apifox 已更新到最新版本。
+
+<Background>
+
+![CleanShot 2025-12-05 at 10.28.17@2x.png](https://api.apifox.com/api/v1/projects/5097254/resources/601148/image-preview)
+</Background>
+
+
+
+点击检测按钮后，AI 会根据预设的检测项目、当前接口文档内容，对该接口文档进行完整性检测，并输出每个评测内容的具体评分、原因及优化建议。
+
+
+<Background>
+
+![Apifox-01.gif](https://api.apifox.com/api/v1/projects/5097254/resources/601050/image-preview)
+</Background>
+

@@ -6,27 +6,50 @@ bots:
   wecom:
     enabled: true
     webhook_url: "${WECOM_WEBHOOK_URL}"
+    # 接收消息配置（用于企微后台回调）
+    token: "${WECOM_TOKEN}"
+    encoding_aes_key: "${WECOM_ENCODING_AES_KEY}"
+    corp_id: "${WECOM_CORP_ID}"
     # 支持的群聊列表
     chat_ids:
       - "技术支持群1"
       - "技术支持群2"
 
+  # Apifox定制版企微机器人 (扣子方案/新API协议)
+  apifox_wecom:
+    enabled: true
+    access_key: "${APIFOX_WECOM_ACCESS_KEY}"
+    access_secret: "${APIFOX_WECOM_ACCESS_SECRET}"
+    api_base_url: "https://www.yjiyun.com" # 替换为提供API服务的真实网关地址
+    webhook_path: "/webhook/apifox_wecom" 
+
   # 飞书
   feishu:
     enabled: true
+    webhook_url: "${FEISHU_WEBHOOK_URL}" # 用于更新通知推送的群自定义机器人Webhook
     app_id: "${FEISHU_APP_ID}"
     app_secret: "${FEISHU_APP_SECRET}"
     encrypt_key: "${FEISHU_ENCRYPT_KEY}"
     verification_token: "${FEISHU_VERIFICATION_TOKEN}"
+    # 进群欢迎语
+    welcome_message: "👋 大家好！我是技术支持机器人，@我 或发送关键字即可提问。\n\n输入 /help 查看使用帮助。"
+    # 触发关键字（用户消息包含任意关键字时触发响应）
+    triggers:
+      keywords:
+        - "帮助"
+        - "问题"
+        - "bug"
+        - "报错"
     # 支持的群列表
     chat_ids:
       - "oc_xxxxxxxxxxxxxxxx"
 
 # LLM 配置
 llm:
-  provider: "anthropic"  # anthropic/openai/deepseek
+  provider: "${LLM_PROVIDER:-anthropic}"  # anthropic/openai/deepseek
   api_key: "${LLM_API_KEY}"
-  model: "claude-3-5-sonnet-20241022"
+  base_url: "${LLM_BASE_URL:-}"  # 自定义 API 端点（可选）
+  model: "${LLM_MODEL:-glm-5}"
   temperature: 0.3
   max_tokens: 2000
   timeout: 30
@@ -98,41 +121,22 @@ classifier:
 
 # 信息收集配置
 info_collection:
-  # 缺陷信息收集字段
+  # 缺陷信息收集字段（简化版）
   bug_fields:
-    - name: "title"
-      question: "请用一句话描述问题（20字以内，包含功能模块和现象）"
+    - name: "environment_version"
+      question: "1. 使用的是Web端还是客户端，版本号多少？"
       required: true
-      example: "【Apifox Web】使用 Agent 发起请求会有 300ms 的延迟响应"
-
-    - name: "version"
-      question: "请问您的 Apifox 版本号是多少？"
-      required: true
-
-    - name: "environment"
-      question: "问题出现在哪个端？[Web端/客户端/浏览器及版本]"
-      required: true
+      example: "Web端，版本 2.3.5"
 
     - name: "steps"
-      question: "请详细描述复现步骤（按1-2-3-4编号，必须清晰且完整）"
+      question: "2. 请描述复现步骤"
       required: true
-      example: "1. 登录 Apifox 账号，进入项目\n2. 点击导入按钮\n3. 选择 Swagger 2.0 格式并上传\n4. 在接口列表查看"
+      example: "1. 打开项目\n2. 点击导入\n3. 选择文件"
 
-    - name: "expected"
-      question: "预期应该发生什么？"
+    - name: "status_expected"
+      question: "3. 请说明现状及预期"
       required: true
-
-    - name: "actual"
-      question: "实际出现了什么问题或现象？"
-      required: true
-
-    - name: "reproducibility"
-      question: "这个问题是必现还是偶现？如果是偶现，大概概率是多少？"
-      required: true
-
-    - name: "additional_info"
-      question: "能否提供以下信息：\n1. 截图或录屏（视频格式，不用gif）\n2. Console 报错截图\n3. Network 日志（HAR文件）\n4. 项目ID/邮箱/团队ID等具体信息"
-      required: false
+      example: "现状：导入失败报错\n预期：导入成功"
 
   # 需求信息收集字段
   feature_fields:
@@ -175,24 +179,42 @@ info_collection:
 # 飞书工单配置
 feishu_ticket:
   base_url: "https://open.feishu.cn"
-  spreadsheet_token: "${FEISHU_SPREADSHEET_TOKEN}"
   app_token: "${FEISHU_APP_TOKEN}"
-  table_id: "${FEISHU_TABLE_ID}"
+  # Bug 缺陷表
+  bug_table_id: "${FEISHU_BUG_TABLE_ID}"
+  # Feature 需求表
+  feature_table_id: "${FEISHU_FEATURE_TABLE_ID}"
 
-  # 字段映射
-  field_mappings:
+  # Bug 表字段映射（根据实际表格字段）
+  bug_field_mappings:
     title: "标题"
     type: "类型"
-    priority: "优先级"
     version: "版本"
     environment: "环境"
-    description: "问题描述"
     steps: "复现步骤"
     expected: "预期结果"
     actual: "实际结果"
-    attachments: "附件"
     submitter: "提交人"
-    created_at: "创建时间"
+
+  # 需求表字段映射（根据实际表格字段）
+  feature_field_mappings:
+    title: "标题"
+    type: "类型"
+    submitter: "提交人"
+
+# 飞书关键词表配置
+keyword_table:
+  base_token: "${FEISHU_KEYWORD_BASE_TOKEN}"
+  table_id: "${FEISHU_KEYWORD_TABLE_ID}"
+
+  # 自动生成关键词配置
+  generator:
+    enabled: true
+    history_days: 7  # 分析过去多少天的工单记录
+    min_cluster_size: 2  # 最少几次相同问题才生成关键词
+    ticket_table_ids:
+      - "${FEISHU_BUG_TABLE_ID}"
+      - "${FEISHU_FEATURE_TABLE_ID}"
 
   # 通知配置
   notification:

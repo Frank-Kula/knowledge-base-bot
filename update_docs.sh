@@ -4,10 +4,16 @@
 # 进入项目目录
 cd "$(dirname "$0")"
 
-# 激活虚拟环境
+# 1. 从 Sitemap 同步最新文档 (Node.js)
+echo "正在同步最新文档..."
+cd data/documents/download-apifoxapidog-docs
+npm run download:apifox
+cd ../../..
+
+# 2. 激活虚拟环境
 source venv/bin/activate
 
-# 智能更新文档
+# 3. 重建知识库 (Python RAG)
 python src/rag/auto_update_docs.py --mode smart --rebuild-kb
 
 # 如果更新成功，发送通知（可选）

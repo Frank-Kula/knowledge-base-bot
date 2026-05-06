@@ -1,0 +1,318 @@
+# Publish docs sites
+
+Publishing a docs site is distinct from using the`Quick Share`feature. While`Quick Share`generates a shareable link for internal and external partners, serving as a temporary communication method, it’s not intended for long-term use.
+
+In contrast, the `Publish Docs Sites` feature allows for more robust customization. It lets you personalize the domain name, page design, navigation, and more. This feature is ideal when you need to make your API documentation publicly accessible on your official website.
+
+
+## Publish your docs site
+
+Click on the default main site and then click the`Publish`button.
+
+<Background>
+
+![CleanShot 2025-10-28 at 15.35.42@2x.png](https://api.apidog.com/api/v1/projects/544525/resources/364846/image-preview)
+</Background>
+
+## Docs site visibility setting
+
+> Apidog version must be `≥ 2.7.15`.
+
+After clicking on the`Publish` button, you can easily control the visibility of your published doc sites based on your needs. Simply click the`Publish right now`button to make your site live.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364847/image-preview)
+</Background>
+
+
+<AccordionGroup>
+  <Accordion title="Public" defaultOpen>
+    
+Your doc sites will be accessible to all internet users. You can also choose to publish your API documentation on [API Hub](https://apidog.com/apihub/), a platform operated by Apidog that helps users discover and explore APIs.
+  </Accordion>
+  <Accordion title="Password protected">
+   
+If you prefer to secure your API documentations with passwords, enable`Password protected`and set a password — either by creating your own or generating a random one.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364848/image-preview)
+</Background>
+
+  </Accordion>
+  <Accordion title="IP Allowlist">
+
+Restrict access to your doc site to only the specific IP addresses or ranges that you configure.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364849/image-preview)
+</Background>
+  </Accordion>
+    
+    <Accordion title="Email Allowlist">
+Only the emails on your configured email allowlist can access your doc sites by verifying their emails through verification codes. The email allowlist supports wildcards, making it easier to manage access for enterprise emails.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364850/image-preview)
+</Background>
+  </Accordion>
+    
+    <Accordion title="Custom Login Page">
+
+
+If you want users to authenticate through your own login system before accessing the online documentation site, you can enable the **Custom Login Page** feature.
+
+<Steps>
+  <Step title="Configuration Guide">
+    Go to the visibility settings of the documentation site, select **Custom Login Page**, and fill in the following two fields:
+
+   - **JWT Secret**: Used to verify the signature of the token. It must be the same as the secret your backend uses when issuing JWTs. You need to generate this secret yourself.
+   - **Login URL**: When users access the online documentation site, they will be redirected to this URL. You must host a login page at this address and implement authentication and token generation on your backend.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/356691/image-preview)
+</Background>
+
+:::tip[]
+This login page is not provided by Apidog — you need to build and host your own.
+:::
+  </Step>
+    
+  <Step title="Authentication Workflow">
+    JWT (JSON Web Token) is an open standard for user authentication. Your login system should follow the flow below:
+
+    1. A user visits the online documentation site published by Apidog (e.g., `https://xxxxx.apidog.io`);
+
+    2. The system automatically redirects them to your configured login page (e.g., `http://localhost:3000`);
+
+    3. The user enters their credentials and submits the form;
+
+    4. Your backend verifies the user credentials;
+
+    5. Upon successful authentication, your backend generates a JWT signed using your configured secret (e.g., `pJRdFC3amihQdWbHvUXNZG9WzYdEGHao`);
+
+    6. Then, redirect the user back to the documentation site (e.g., `https://xxxxx.apidog.io`) and include the token as a query parameter named `auth_token`, like so:
+
+    ```js
+    https://xxxxx.apidog.io?auth_token=eyJhbGciOiJI...
+    ````
+
+    7. Apidog will automatically validate the token. If successful, the user can access the documentation content.
+
+    The login flow is illustrated in the diagram below:
+
+
+   
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/356722/image-preview)
+
+    <Background>
+
+![03-apidog-login.gif](https://api.apidog.com/api/v1/projects/544525/resources/356692/image-preview)
+     </Background> 
+
+    </Step>
+
+  <Step title="Important Notes">
+
+    - JWTs must be generated by your backend and signed using the secret configured in Apidog;
+
+    - The JWT should be passed back to the documentation site via the `auth_token` URL parameter;
+
+    - Apidog will automatically parse and validate the token;
+
+    - The documentation site URL can be the default address provided by Apidog or a custom domain you configured.
+
+  </Step>
+
+  <Step title="FAQ">
+
+    <Accordion title="What tech stack can I use for the login page?" defaultOpen>
+    There are no restrictions. As long as your backend can handle POST login requests and return a URL containing `auth_token`, it will work. Node.js, PHP, Python, Go, etc., are all supported.
+    </Accordion>
+
+    <Accordion title="Is there a sample project available?" defaultOpen={false}>
+    You can refer to the example at https://github.com/readmeio/readme-custom-login-demo.
+    </Accordion>
+
+  </Step>
+</Steps>
+
+
+
+  </Accordion>
+</AccordionGroup>
+
+
+
+## Publishing scope
+
+By default, the scope for publishing documentation is set to all`Shared`resources. You can configure this in the`APIs`. For more details, please refer to [visibility settings](https://docs.apidog.com/visibility-settings-662939m0.md). 
+
+## Release
+
+You can create and publish multiple versions of your API documentation. [Learn more about publishing API versions.](https://docs.apidog.com/publish-api-versions-645643m0.md)
+
+<Background>
+![release settings for API Documentations.jpg](https://api.apidog.com/api/v1/projects/544525/resources/349504/image-preview)
+</Background>
+
+
+:::tip[]
+- [How Can Document Users Modify the Base URL in Shared Docs?](https://docs.apidog.com/how-can-document-users-modify-the-base-url-in-shared-docs-984469m0)
+- [How to Share Headers (e.g., Token) in Apidog Online Docs?](https://docs.apidog.com/how-to-share-headers-e-g-token-in-apidog-online-docs-1291962m0)
+:::
+
+## Domain
+
+- **Apidog provided domain**: Your document will have a default Apidog Subdomain, such as `https://vhh2uhkjv7.apidog.io`. You can also modify it manually. All Apidog documents use the `apidog.io` domain.
+
+- **Custom Domain**: You can bind the Apidog document to your own domain. Learn more about [Custom domain](https://docs.apidog.com/custom-domain-631339m0.md).
+
+<Background>
+![domain settings for API documentations.jpg](https://api.apidog.com/api/v1/projects/544525/resources/349505/image-preview)
+</Background>
+
+## Customize
+
+You can customize appearance and layouts for API documentations.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364852/image-preview)
+</Background>
+
+
+You can preview your document in real time here and save it once you're satisfied with the result.
+
+<Background>
+
+![Apidog-01.gif](https://api.apidog.com/api/v1/projects/544525/resources/364853/image-preview)
+</Background>
+
+
+
+### Appearance
+
+
+In Appearance Settings, you can configure various basic options for your API documentation, including:
+
+- Title
+- Logo
+- Favicon
+- Primary color
+- Language
+- Light/Dark mode
+
+
+
+<Background>
+  
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364857/image-preview)
+</Background>
+
+
+In`Display content `, you can customize which fields to display in API documentation, including:
+
+- Base URL
+- Maintainer
+- Show 'Last Modified' Time above Endpoint Description
+- Show 'Modified at' Time at Document's End
+- Request Code Samples
+- Hide 'Run in Apidog' Button (Available for Professional or higher plans)
+- Show 'Try it' Button
+- Allow 'Export', 'Clone' Data
+- ...
+
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364858/image-preview)
+
+</Background>
+
+
+### Layout & Navigation
+
+You can customize the page layout with ease. Learn more about [Custom layouts](https://docs.apidog.com/custom-layouts-631390m0.md).
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364859/image-preview)
+</Background>
+
+### Custom Landing Page
+
+You can customize the homepage of your publish docs using either Markdown or HTML with CSS and JavaScript.
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364862/image-preview)
+</Background>
+
+### Custom CSS, JavaScript, and HTML
+
+You can configure global CSS, JavaScript, and footer HTML. For more details, see the [Custom CSS, JavaScript, HTML documentation](https://docs.apidog.com/custom-css-js-html).
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364863/image-preview)
+</Background>
+
+
+## Advanced settings
+
+<Background>
+
+![image.png](https://api.apidog.com/api/v1/projects/544525/resources/364860/image-preview)
+</Background>
+
+### Documentation search 
+
+While the published API documentation includes a built-in search feature by default, Apidog offers integration with Algolia to enhance search capabilities. Learn more about [documentation Search](https://docs.apidog.com/documentation-search-746862m0.md).
+
+### CORS proxy
+
+You can specify a CORS proxy to avoid issues caused by browser security restrictions. Learn more about [CORS Proxy](https://docs.apidog.com/cors-proxy-780225m0.md).
+
+### Google analytics
+
+The Apidog doc sites now supports integration with Google Analytics. [Learn more about integrating Google Analytics with Doc Sites.](https://docs.apidog.com/integrating-google-analytics-with-doc-sites-787035m0.md)
+
+### Publish to API hub
+
+You can choose to publish your docs on [API Hub](https://apidog.com/apihub), an open platform operated by Apidog, designed specifically for sharing and exploring APIs.
+
+### Description
+
+If the project has been published to the API Hub, then this description will be displayed on API Hub.
+
+### Allow 'Export', 'Clone' data
+
+You can export the released documentation data in main branch.
+
+### Docs redirect rules
+
+You can set up redirect rules to automatically redirect users to the correct documentation when URLs change, preventing broken links and ensuring a seamless experience. 
+
+
+### URL & Slug rules
+
+Define URL rules for your API documentations.
+
+## Publish multiple docs sites
+
+To publish docs across different channels within the same project, you can create additional docs sites during publishing. For easier management, you can duplicate the main site’s configuration for each new site. Each sub-site can also have a unique custom domain name.
+
+<Background>
+![publishing-docs-sites-introduction-05.png](https://api.apidog.com/api/v1/projects/544525/resources/347928/image-preview)
+</Background>
+
+Only subsites let you set the visibility scope for published docs, allowing you to choose which resources are publicly accessible.
+
+<Background>
+![publishing-docs-sites-introduction-06.png](https://api.apidog.com/api/v1/projects/544525/resources/347929/image-preview)
+</Background>
